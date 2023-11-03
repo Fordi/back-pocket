@@ -2,3 +2,4 @@
     ```
     javascript:(({location:t,navigator:a})=>{let e;const i=t.href.replace(/\?.*$/,"");"github.com"===t.hostname?e=t.pathname.split("/").slice(2).filter((t,a)=>!(a%2)).join("#"):t.hostname.endsWith("atlassian.net")&&(e=t.pathname.split("/").pop()),e&&a.clipboard.writeText(`[${e}](${i})`)})(globalThis);
     ```
+<a href="javascript:(({location:t,navigator:a})=>{let e;const i=t.href.replace(/\?.*$/,"");"github.com"===t.hostname?e=t.pathname.split("/").slice(2).filter((t,a)=>!(a%2)).join("#"):t.hostname.endsWith("atlassian.net")&&(e=t.pathname.split("/").pop()),e&&a.clipboard.writeText(`[${e}](${i})`)})(globalThis);">Copy story / PR</a>
