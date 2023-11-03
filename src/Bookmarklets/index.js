@@ -31,10 +31,19 @@ await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
         ${bookmarklet.getAttribute("name")}
       </a>
       <p>${bookmarklet.getAttribute('bookmarklet')}</p>
-      <pre>${hljs.highlightAuto(source).value}</pre>
+      <pre title="click to copy source">${hljs.highlightAuto(source).value}</pre>
     `;
-    const btn = link.querySelector("button");
-
+    const pre = link.querySelector("pre");
+    pre.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(source);
+      pre.classList.add('pulse');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          pre.classList.remove('pulse');
+        });
+      });
+    });
     link.addEventListener("click", () => {
       if (link.classList.contains("open")) {
         link.classList.remove("open");
