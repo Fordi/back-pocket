@@ -1,1 +1,4 @@
-* [Copy story / PR](javascript:%28%28{location:t,navigator:a}%29=>{let e;const i=t.href.replace%28/?.*$/,""%29;"github.com"===t.hostname?e=t.pathname.split%28"/"%29.slice%282%29.filter%28%28t,a%29=>!%28a%2%29%29.join%28"#"%29:t.hostname.endsWith%28"atlassian.net"%29&&%28e=t.pathname.split%28"/"%29.pop%28%29%29,e&&a.clipboard.writeText%28`[${e}]%28${i}%29`%29}%29%28globalThis%29;)
+* Copy story / PR:
+    ```
+    javascript:(({location:t,navigator:a})=>{let e;const i=t.href.replace(/\?.*$/,"");"github.com"===t.hostname?e=t.pathname.split("/").slice(2).filter((t,a)=>!(a%2)).join("#"):t.hostname.endsWith("atlassian.net")&&(e=t.pathname.split("/").pop()),e&&a.clipboard.writeText(`[${e}](${i})`)})(globalThis);
+    ```
