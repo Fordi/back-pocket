@@ -1,0 +1,1 @@
+* [Copy story / PR](javascript:(({location:t,navigator:a}%29=>{let e;const i=t.href.replace(/?.*$/,""%29;"github.com"===t.hostname?e=t.pathname.split("/"%29.slice(2%29.filter((t,a%29=>!(a%2%29%29.join("#"%29:t.hostname.endsWith("atlassian.net"%29&&(e=t.pathname.split("/"%29.pop(%29%29,e&&a.clipboard.writeText(`[${e}](${i}%29`%29}%29(globalThis%29;)
