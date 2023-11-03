@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta encoding="utf-8" />
+    <title>Bookmarklets</title>
+    <link rel="stylesheet" href="index.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/dark.min.css"
+    />
+    <script defer type="module" src="../build/Bookmarklets.js"></script>
+  </head>
+  <body>
+    <section>
+      <header>
+        <h1>Bookmarklets</h1>
+      </header>
+      <p>
+        Drag these to your bookmarks bar for useful tools. Click on any one to
+        see its source code.
+      </p>
+      <script
+        name="⧉🔗"
+        bookmarklet="Copy a link as Markdown, with smarts for Jira, Google, and Github"
+      >
+        () => {
+          ((url, navigator) => {
+            let text = document.title;
+            let href = url.href.replace(/\?.*$/, "");
+            if (
+              "github.com" === url.hostname &&
+              /\/(?:issues|pull)\/\d+$/.test(url.pathname)
+            ) {
+              text = url.pathname
+                .split("/")
+                .slice(2)
+                .filter((t, a) => !(a % 2))
+                .join("#");
+            } else if (
+              url.hostname.endsWith("atlassian.net") &&
+              /\/[A-Z]+-\d+$/.test(url.pathname)
+            ) {
+              text = url.pathname.split("/").pop();
+            } else if (url.hostname === "www.google.com") {
+              const q = url.searchParams.get("q");
+              url.search = "";
+              url.searchParams.append("q", q);
+              href = url.href;
+              text = q.replace(/\]/g, "\\]");
+            }
+            navigator.clipboard.writeText(`[${text}](${href})`);
+          })(new URL(location), navigator);
+        };
+      </script>
+      <script
+        name="Decomment"
+        bookmarklet="Remove comments from the active textarea"
+      >
+        () => {
+          void (document.activeElement.value = document.activeElement.value
+            .replace(/<\!--[^]*?-->/g, "")
+            .trim()
+            .replace(/\n\n+/g, "\n\n"));
+        };
+      </script>
+    </section>
+  </body>
+</html>

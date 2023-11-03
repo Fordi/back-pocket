@@ -1,0 +1,52 @@
+body,
+html {
+  font-family: sans-serif;
+  background: #444;
+  color: #EEE;
+}
+section {
+  width: 50%;
+  margin: 0 auto;
+  max-width: 6in;
+}
+.bookmarklet > button {
+  border: none;
+  background: none;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  transition: transform 0.4s;
+  transform-origin: 50% 50%;
+  text-align: center;
+}
+.bookmarklet > button:before {
+  content: "▶";
+  position: relative;
+  top: -0.2em;
+}
+.bookmarklet.open > button {
+  transform: rotate(90deg);
+}
+.bookmarklet > pre {
+  padding: 0 1em;
+  max-height: 0;
+  border: none;
+  overflow: hidden;
+  background: #222222;
+  color: #cccccc;
+  transition: all 0.4s;
+}
+.bookmarklet.open > pre {
+  padding: 1em 1em;
+  border-radius: 1em;
+  max-height: 100vh;
+}
+.bookmarklet > a {
+  text-decoration: none;
+  background-color: #222;
+  color: #CCC;
+  padding: 0.25em 0.5em;
+  border-radius: 0.25em;
+}
