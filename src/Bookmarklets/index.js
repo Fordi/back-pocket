@@ -17,18 +17,19 @@ const unindent = (s) => {
     return line;
   }).join("\n");
 };
-const escapeHtml = s => s.replace(/"/g, '&quot;');
+const escapeHtml = s => s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
   async (bookmarklet) => {
     const code = bookmarklet.innerHTML.replace(/^[\s\r\n\t]*(?:\(\)[\s\r\n\t]*=>|function)[\s\r\n\t]*\{|\};[\s\r\n\t]*?$/g, '');
     const minified = escapeHtml((await minify(code)).code);
     const source = unindent(code);
     const link = document.createElement("div");
+    let href = `javascript:${minified}`;
     link.className = "bookmarklet";
     link.innerHTML = `
       <button title="see code"></button>
-      <a title="drag to your bookmarks bar\nclick to see code" href="javascript:${minified}">
-        ${bookmarklet.getAttribute("name")}
+      <a title="drag to your bookmarks bar\nclick to see code" href="${href}">
+        ${escapeHtml(bookmarklet.getAttribute("name"))}
       </a>
       <p>${bookmarklet.getAttribute('bookmarklet')}</p>
       <pre title="click to copy source">${hljs.highlightAuto(source).value}</pre>
@@ -55,7 +56,7 @@ await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
     link.querySelector('a').addEventListener('click', (e) => {
       e.preventDefault();
       return true;
-    })
+    });
     bookmarklet.parentNode.insertBefore(link, bookmarklet);
   }
 ));
