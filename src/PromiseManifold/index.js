@@ -34,15 +34,6 @@ export default class PromiseManifold {
   }
 
   /**
-   * Add a redux action to a pipeline
-   * @param {T} id ID of pipeline
-   * @param  {...Action} actions
-   */
-  addAction(id, ...actions) {
-    this.add(id, ...actions.map((action) => (dispatch) => dispatch(action)));
-  }
-
-  /**
    * Remove a promisor
    * @param {T} id ID of pipeline
    * @returns {((...A) => Promise<R>)[]} the content of the removed pipeline
@@ -97,14 +88,5 @@ export default class PromiseManifold {
       await Promise.all(promises);
     }
     return results;
-  }
-
-  /**
-   * Assuming your pipelines are all async redux actions (e.g., signature is `(Dispatcher, StateAccessor) => Promise<R>`),
-   * return a suitable rolled up action.
-   * @returns {(Dispatcher, StateAccessor) => Promise<Map<T, R[]>>}
-   */
-  toReduxAction() {
-    return (dispatch) => this.run(dispatch);
   }
 }

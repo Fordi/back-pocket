@@ -1,4 +1,5 @@
-// TODO: This is jasmine test code; convert to node native.
+import { describe, it, beforeEach, afterEach } from "node:test";
+import assert from "node:assert";
 import PromiseManifold from "./index.js";
 
 const mapToObject = (map) => {
@@ -14,22 +15,22 @@ describe("PromiseManifold", () => {
     const m = new PromiseManifold();
     let ran = false;
     m.add("TEST", function () {
-      expect(this).toBe(m);
+      assert.strictEqual(this, m);
       ran = true;
     });
     await m.run();
-    expect(ran).toBe(true);
+    assert.strictEqual(ran, true);
   });
   it("allows a custom context", async () => {
     const ctx = {};
     const m = new PromiseManifold(ctx);
     let ran = false;
     m.add("TEST", function () {
-      expect(this).toBe(ctx);
+      assert.strictEqual(this, ctx);
       ran = true;
     });
     await m.run();
-    expect(ran).toBe(true);
+    assert.strictEqual(ran, true);
   });
   it("passes arguments to promisors", async () => {
     let result;
@@ -38,7 +39,7 @@ describe("PromiseManifold", () => {
       result = args;
     });
     await m.run(1, 2, 3);
-    expect(result).toEqual([1, 2, 3]);
+    assert.deepEqual(result, [1, 2, 3]);
   });
   describe("order of operations", () => {
     let runs;
@@ -77,7 +78,7 @@ describe("PromiseManifold", () => {
       const promise = m.run();
       // jasmine.clock().tick(1000);
       await promise;
-      expect(runs).toEqual([1, 2]);
+      assert.deepEqual(runs, [1, 2]);
     });
     it("runs pipelines in parallel", async () => {
       const m = new PromiseManifold();
@@ -86,13 +87,11 @@ describe("PromiseManifold", () => {
       const promise = m.run();
       // jasmine.clock().tick(1000);
       const result = mapToObject(await promise);
-      expect(runs).toEqual([11, 21, 12, 22]);
-      expect(result).toEqual(
-        jasmine.objectContaining({
-          EARLY: [[11, 12]],
-          LATE: [[21, 22]],
-        }),
-      );
+      assert.deepEqual(runs, [11, 21, 12, 22]);
+      assert.deepEqual(result, {
+        EARLY: [[11, 12]],
+        LATE: [[21, 22]],
+      });
     });
     it("can move actions from one pipeline to another", async () => {
       const m = new PromiseManifold();
@@ -102,15 +101,13 @@ describe("PromiseManifold", () => {
       const promise = m.run();
       // jasmine.clock().tick(1000);
       const result = mapToObject(await promise);
-      expect(runs).toEqual([11, 12, 21, 22]);
-      expect(result).toEqual(
-        jasmine.objectContaining({
-          EARLY: [
-            [11, 12],
-            [21, 22],
-          ],
-        }),
-      );
+      assert.deepEqual(runs, [11, 12, 21, 22]);
+      assert.deepEqual(result, {
+        EARLY: [
+          [11, 12],
+          [21, 22],
+        ],
+      });
     });
     it("move doesn't throw if there's nothing in the source pipeline", async () => {
       const m = new PromiseManifold();
@@ -118,22 +115,5 @@ describe("PromiseManifold", () => {
       m.move("LATE", "EARLY");
       await m.run();
     });
-  });
-
-  it("can be used as a way to roll up redux actions", async () => {
-    const m = new PromiseManifold();
-    const raw = { type: "raw" };
-    const thunk = { type: "thunk" };
-    const aThunk = { type: "asyncThunk" };
-
-    const aThunkCreator = jasmine.createSpy(aThunk.type).and.resolveTo(aThunk);
-    const thunkCreator = jasmine.createSpy(thunk.type).and.returnValue(thunk);
-
-    const mockDispatch = jasmine.createSpy("dispatch");
-    m.addAction("actions", thunkCreator, aThunkCreator, raw);
-    await m.toReduxAction()(mockDispatch);
-    expect(mockDispatch).toHaveBeenCalledWith(thunkCreator);
-    expect(mockDispatch).toHaveBeenCalledWith(aThunkCreator);
-    expect(mockDispatch).toHaveBeenCalledWith(raw);
   });
 });
