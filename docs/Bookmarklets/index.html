@@ -17,7 +17,7 @@
       </p>
       <script
         name="⧉&#6834;"
-        bookmarklet="Copy a link as Markdown, with smarts for Jira, Google, and Github"
+        bookmarklet="Copy a link as Markdown, with smarts for Jira, Backlog, Google, and Github"
       >
         () => {
           ((url, navigator) => {
@@ -35,6 +35,11 @@
             } else if (
               url.hostname.endsWith("atlassian.net") &&
               /\/[A-Z]+-\d+$/.test(url.pathname)
+            ) {
+              text = url.pathname.split("/").pop();
+            } else if (
+              url.hostname.endsWith("backlog.com") &&
+              /^\/view\/[A-Z_]+-\d+$/.test(url.pathname)
             ) {
               text = url.pathname.split("/").pop();
             } else if (url.hostname === "www.google.com") {

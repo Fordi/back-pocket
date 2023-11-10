@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "build:bookmarklets": "rollup -c rollup/Bookmarklets.js",
-    "build": "npm run build:bookmarklets"
+    "build": "npm run build:bookmarklets",
+    "serve": "http-server docs"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
     "highlight.js": "^11.9.0",
+    "http-server": "^14.1.1",
     "rollup": "^4.2.0",
     "terser": "^5.24.0"
   }
