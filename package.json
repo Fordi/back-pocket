@@ -6,11 +6,13 @@
   "scripts": {
     "build:bookmarklets": "rollup -c rollup/Bookmarklets.js",
     "build": "npm run build:bookmarklets",
-    "serve": "http-server docs"
+    "serve": "http-server docs",
+    "test": "rm -rf \"${NODE_V8_COVERAGE:-./coverage}\"; mkdir \"${NODE_V8_COVERAGE:-./coverage}\"; NODE_V8_COVERAGE=\"${NODE_V8_COVERAGE:-./coverage}\" node --test-reporter @fordi-org/node-html-reporter --experimental-test-coverage --test"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@fordi-org/node-html-reporter": "^0.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "highlight.js": "^11.9.0",
     "http-server": "^14.1.1",
