@@ -64,6 +64,32 @@
             .replace(/\n\n+/g, "\n\n"));
         };
       </script>
+      <script
+        name="Fix minio preview"
+        bookmarklet="Decompresses the minio preview"
+        >
+        void(async () => {
+          const pako = window.pako ?? await new Promise((resolve) => { document.head.appendChild(Object.assign(document.createElement('script'), { src: "https://unpkg.com/pako/dist/pako.js", onload: () => resolve(window.pako) })) });
+        
+          return Promise.all([...document.querySelectorAll('iframe')].map(async (frame) => {
+            console.log(frame);
+            const url = new URL(frame.src);
+            url.searchParams.delete('preview');
+            const compressed = await fetch(url).then(r => r.arrayBuffer());
+            const decompressed = pako.ungzip(compressed);
+            const decoded = new TextDecoder("utf-8").decode(decompressed);
+        		const target = frame.contentDocument.querySelector('pre');
+            try {
+              const formatted = JSON.stringify(JSON.parse(decoded), null, 2);
+              target.textContent = formatted;
+              return formatted;
+            } catch (e) {
+              target.textContent = decoded;
+              return decoded;
+            }
+          }));
+        })();
+        </script>
     </section>
   </body>
 </html>
