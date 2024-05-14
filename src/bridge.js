@@ -3,6 +3,15 @@ import { createRoot } from "react-dom/client";
 import { LitElement } from "lit";
 
 /**
+ * Convert PascalCase to kebab-case, suitable for tag names.  For consecutive capitals, the last in the series is seen
+ * as the start of a new word if it's followed by further lowercases - e.g., `UserURLEntry` would become
+ * `user-url-entry`, but `UserURL` would become `user-url`.  Underscores ("_") are converted to `--`.
+ * @param {string} str Any PascalCase identifier (A-Z, a-z, 0-9, _)
+ * @returns {string} The corresponding kebab-case identifier
+ */
+const pascalToKebab = (str) => str.split('_').map(s => s.replace(/([a-z0-9])([A-Z])|([A-Z]+)([A-Z][a-z0-9])/g, "$1$3-$2$4").toLowerCase()).join('--');
+
+/**
  * Create a Lit-like web component from a React component.  Alternately,
  * @param {object} properties Similar to LitElement.get properties; an object describing the interface to the React
  * component (see notes)
@@ -39,40 +48,25 @@ import { LitElement } from "lit";
  * ```
  *
  * The component's name will be derived from the class/function name, e.g., SampleReactComponent will become usable as
- * `<sample-react-component/>`.  This can be overridden by passing a special `@name` property.
+ * `<sample-react-component/>`.  This can be overridden (or provided, in the case of anonymous functions) by passing a
+ * special `@name` property.
  *
  * `@eventname` properties will be automatically mapped to `onEventname`.  Note that only the character following `on`
- * is capitalized if it wasn't so in the lit event.
+ * is capitalized if it wasn't so in the lit event.  So `@mousemove` will become `onMousemove`.
  * 
- * `.key` properties are carried directly into the React world as props.  Non-dotted properties are carried into React
- *  as strings.
+ * `.key` properties are carried directly into the React world as props, sans the leading dot.  Non-dotted properties
+ * are carried into React as strings.
  *
- * It is recommended only to use this utility function for lit's entry points into the React world; it should not be
- * used to expose every React component as a web component.  React components should use
- * <SampleReactComponent ... /> as usual.
+ * It is recommended only to use this utility for Lit's entry points into the React world; it should not be used to
+ * expose every React component as a web component.  React components should use <SampleReactComponent ... /> as usual.
  */
 export default function bridge(properties, ReactComp) {
     const name = ReactComp.name;
-    const elem = properties['@name'] ?? (
-        name
-            .replace(/[A-Z]/g, m => `-${m.toLowerCase()}`) // MyCOOLComp => -my-c-o-o-l-comp
-            .replace(/^-/g, '') // -my-c-o-o-l-comp => my-c-o-o-l-comp
-            .replace(/-([a-z\-]+)-/g, (_, m) => _ && `-${m.replace(/-/g, '')}-`) // my-c-o-o-l-comp => my-cool-comp
-    );
+    const elem = properties['@name'] ?? pascalToKebab(name);
     const safeProps = { ...properties };
     delete safeProps['@name'];
-    const toReactKVP = (key, inst) => {
-        let value;
-        if (key.startsWith('@')) {
-            key = `on${key.substring(1, 2).toUpperCase()}${key.substring(2)}`;
-            value = inst[key];
-        } else if (key.startsWith('.')) {
-            key = key.substring(1);
-            value = inst[key];
-        } else {
-            value = inst.getAttribute?.(key) ?? inst[key];
-        }
-        return [key, value];
+    const nameEvent = (eventName) => {
+        `on${eventName.substring(0, 1).toUpperCase()}${eventName.substring(1)}`;
     }
     class Wrapper extends LitElement {
         constructor() {
@@ -101,14 +95,16 @@ export default function bridge(properties, ReactComp) {
                     rerender = true;
                 }
             })
-            if (this._root && rerender) {
+            if (rerender) {
                 this.scheduleRender();
             }
         }
         scheduleRender() {
             if (!this._scheduled) {
                 this._scheduled = requestAnimationFrame(() => {
-                    this._root.render(createElement(ReactComp, this._state));
+                    if (this._root) {
+                        this._root.render(createElement(ReactComp, this._state));
+                    }
                     this._scheduled = false;
                 });
             }
@@ -120,18 +116,18 @@ export default function bridge(properties, ReactComp) {
             return name;
         }
         addEventListener(eventName, handler, bubbles) {
-            if (typeof handler === 'object' && safeProps[`@${eventName}`] && typeof bubbles === 'function') {
+            if (`@${eventName}` in safeProps && typeof handler === 'object' && typeof bubbles === 'function') {
                 this.updateState({
-                    [`on${eventName.substring(0, 1).toUpperCase()}${eventName.substring(1)}`]: bubbles,
+                    [nameEvent(eventName)]: bubbles,
                 });
             } else {
                 super.addEventListener(eventName, handler, bubbles);
             }
         }
         removeEventListener(eventName, handler, bubbles) {
-            if (typeof handler === 'object' && safeProps[`@${eventName}`] && typeof bubbles === 'function') {
+            if (`@${eventName}` in safeProps && typeof handler === 'object' && typeof bubbles === 'function') {
                 this.updateState({
-                    [`on${eventName.substring(0, 1).toUpperCase()}${eventName.substring(1)}`]: undefined,
+                    [nameEvent(eventName)]: undefined,
                 });
             } else {
                 super.removeEventListener(eventName, handler, bubbles);
@@ -142,40 +138,29 @@ export default function bridge(properties, ReactComp) {
             this.updateState({ [key]: value });
             return rv;
         }
-        getState(key) {
-            return this._state[key];
-        }
     }
-    const descs = {};
-    Object.keys(safeProps).forEach((key) => {
-        if (!key.startsWith('.')) {
-            return;
-        }
-        key = key.substring(1);
-        const [k] = toReactKVP(key, {});
-        descs[k] = {
-            configurable: true,
-            enumerable: true,
-            get() {
-               return this.getState[k];
-            },
-            set(v) {
-                if (this.getState[k] !== v) {
-                    this.updateState({
-                        [k]: v
-                    })
-                }
-            },
-        };
-        return descs;
-    });
-    Object.defineProperties(Wrapper.prototype, descs);
-
-    try {
-        customElements.define(elem, Wrapper);
-    } catch (e) {
-        console.log(`${elem} already registered`);
-    }
-
+    
+    Object.defineProperties(Wrapper.prototype, Object.keys(safeProps)
+        .filter(key => key.startsWith('.'))
+        .map((litName) => litName.substring(1))
+        .reduce((d, key) => ({
+            ...d,
+            [key]: {
+                configurable: true,
+                enumerable: true,
+                get() {
+                    return this._state[key];
+                },
+                set(v) {
+                    if (this._state[key] !== v) {
+                        this.updateState({
+                            [key]: v
+                        })
+                    }
+                },
+            }
+        }), {})
+    );
+    customElements.define(elem, Wrapper);
     return ReactComp;
 };
