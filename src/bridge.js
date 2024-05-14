@@ -12,7 +12,7 @@ import { LitElement } from "lit";
 const pascalToKebab = (str) => str.split('_').map(s => s.replace(/([a-z0-9])([A-Z])|([A-Z]+)([A-Z][a-z0-9])/g, "$1$3-$2$4").toLowerCase()).join('--');
 
 /**
- * Create a Lit-like web component from a React component.  Alternately,
+ * Create a Lit-like web component from a React component.
  * @param {object} properties Similar to LitElement.get properties; an object describing the interface to the React
  * component (see notes)
  * @param {string} properties["@name"] Force the element name for the component.  Default is based on the `.name` 
