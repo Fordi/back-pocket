@@ -89,7 +89,41 @@
             }
           }));
         })();
-        </script>
+      </script>
+      <script
+        name="MD"
+        bookmarklet="Apply markdown inlines to the current input"
+      >
+        (() => {
+          const italics = {};
+          const bold = {};
+          const boldItalics = {};
+          const shiftChar = (c, ucs, lcs) => String.fromCodePoint(c.codePointAt(0) + (c < 'a' ? ucs : lcs));
+          [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'].forEach(c => {
+            italics[c] = shiftChar(c, 0x1d5c7, 0x1d5c1);
+            bold[c] = shiftChar(c, 0x1d593, 0x1d58d);
+            boldItalics[c] = shiftChar(c, 0x1d5fb, 0x1d5f5);
+          });
+          const mkMapper = (map) => (_, a, b) => [...(a ?? b)].map(c => map[c] ?? c).join('');
+          const patterns = [
+            [/___(.*?)___|\*\*\*(.*?)\*\*\*/g, mkMapper(boldItalics)],
+            [/__(.*?)__|\*\*(.*?)\*\*/g, mkMapper(bold)],
+            [/_(.*?)_|\*(.*?)\*/g, mkMapper(italics)],
+          ];
+          const recUpdate = (el) => {
+            if (el.nodeType === Node.TEXT_NODE) {
+              let s = el.textContent;
+              for (const [pattern, mapper] of patterns) {
+                s = s.replace(pattern, mapper);
+              }
+              el.textContent = s;
+            } else if (el.childNodes.length) {
+              [...el.childNodes].forEach(recUpdate);
+            }
+          };
+          recUpdate(document.activeElement);
+        })();
+      </script>
     </section>
   </body>
 </html>
