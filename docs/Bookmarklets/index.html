@@ -95,21 +95,25 @@
         bookmarklet="Apply markdown inlines to the current input"
       >
         (() => {
-          const italics = {};
-          const bold = {};
-          const boldItalics = {};
-          const shiftChar = (c, ucs, lcs) => String.fromCodePoint(c.codePointAt(0) + (c < 'a' ? ucs : lcs));
-          [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'].forEach(c => {
-            italics[c] = shiftChar(c, 0x1d5c7, 0x1d5c1);
-            bold[c] = shiftChar(c, 0x1d593, 0x1d58d);
-            boldItalics[c] = shiftChar(c, 0x1d5fb, 0x1d5f5);
+          const maps = [{},{},{}];
+          const fcp = String.fromCodePoint;
+          const fa = (c, f = 0) => new Array(c).fill(f);
+          const shiftChar = (c, ucs, lcs) => fcp(c.codePointAt(0) + (c < 'a' ? ucs : lcs));
+          fa(52).map((_, i) => fcp((i < 26 ? 65 : 71) + i)).forEach(c => {
+            [
+              [0x1d5fb, 0x1d5f5],
+              [0x1d593, 0x1d58d],
+              [0x1d5c7, 0x1d5c1],
+            ].forEach((o, i) => maps[i][c] = shiftChar(c, ...o));
           });
-          const mkMapper = (map) => (_, a, b) => [...(a ?? b)].map(c => map[c] ?? c).join('');
-          const patterns = [
-            [/___(.*?)___|\*\*\*(.*?)\*\*\*/g, mkMapper(boldItalics)],
-            [/__(.*?)__|\*\*(.*?)\*\*/g, mkMapper(bold)],
-            [/_(.*?)_|\*(.*?)\*/g, mkMapper(italics)],
-          ];
+          const mkMapper = (index) => (_, a, b) => [...(a ?? b)].map(c => maps[index][c] ?? c).join('');
+          const f = '(.*?)';
+          const mkPattern = (n) => {
+            const u = new Array(n).fill('_').join('');
+            const a = new Array(n).fill('\\*').join('');
+            return new RegExp(`${u}${f}${u}|${a}${f}${a}`, 'g');
+          }
+          const patterns = new Array(3).fill('').map((_, i) => [mkPattern(3 - i), mkMapper(i)]);
           const update = (s) => {
             for (const [pattern, mapper] of patterns) {
               s = s.replace(pattern, mapper);
