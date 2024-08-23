@@ -110,13 +110,17 @@
             [/__(.*?)__|\*\*(.*?)\*\*/g, mkMapper(bold)],
             [/_(.*?)_|\*(.*?)\*/g, mkMapper(italics)],
           ];
+          const update = (s) => {
+            for (const [pattern, mapper] of patterns) {
+              s = s.replace(pattern, mapper);
+            }
+            return s;
+          };
           const recUpdate = (el) => {
             if (el.nodeType === Node.TEXT_NODE) {
-              let s = el.textContent;
-              for (const [pattern, mapper] of patterns) {
-                s = s.replace(pattern, mapper);
-              }
-              el.textContent = s;
+              el.textContent = update(el.textContent);
+            } else if (el.nodeName === 'INPUT' || el.nodeName === 'TEXTAREA') {
+              el.value = update(el.value);
             } else if (el.childNodes.length) {
               [...el.childNodes].forEach(recUpdate);
             }
