@@ -94,22 +94,17 @@
         name="MD"
         bookmarklet="Apply markdown inlines to the current input"
       >
-        (() => {
-          const maps = [{},{},{}];
-          const fcp = String.fromCodePoint;
-          const fa = (c, f = 0) => new Array(c).fill(f);
-          const shiftChar = (c, ucs, lcs) => fcp(c.codePointAt(0) + 120205 + (c < 'a' ? ucs : lcs));
-          fa(52).map((_, i) => fcp((i < 26 ? 65 : 71) + i)).forEach(c => 
-            [104,0,52].forEach((o, i) => maps[i][c] = shiftChar(c, o + 6, o))
+        ((maps, fromCodePoint, filledArray, matchAnyGroup) => {
+          filledArray(52).map((_, i) => fromCodePoint((i < 26 ? 65 : 71) + i)).forEach(c => 
+            [104,0,52].forEach((o, i) => maps[i][c] = fromCodePoint(c.codePointAt(0) + 120205 + o + (c < 'a' ? 6 : 0)))
           );
-          const mkMapper = (index) => (_, a, b) => [...(a ?? b)].map(c => maps[index][c] ?? c).join('');
-          const f = '(.*?)';
+          const mkMapper = (m) => (_, a, b) => [...(a ?? b)].map(c => m[c] ?? c).join('');
           const mkPattern = (n) => {
-            const u = new Array(n).fill('_').join('');
-            const a = new Array(n).fill('\\*').join('');
-            return new RegExp(`${u}${f}${u}|${a}${f}${a}`, 'g');
+            const u = filledArray(n, '_').join('');
+            const a = filledArray(n, '\\*').join('');
+            return new RegExp(`${u}${matchAnyGroup}${u}|${a}${matchAnyGroup}${a}`, 'g');
           }
-          const patterns = new Array(3).fill('').map((_, i) => [mkPattern(3 - i), mkMapper(i)]);
+          const patterns = maps.map((m, i) => [mkPattern(3 - i), mkMapper(m)]);
           const update = (s) => {
             for (const [pattern, mapper] of patterns) {
               s = s.replace(pattern, mapper);
@@ -119,14 +114,19 @@
           const recUpdate = (el) => {
             if (el.nodeType === Node.TEXT_NODE) {
               el.textContent = update(el.textContent);
-            } else if (el.nodeName === 'INPUT' || el.nodeName === 'TEXTAREA') {
+            } else if (/INPUT|TEXTAREA/.test(el.nodeName)) {
               el.value = update(el.value);
             } else if (el.childNodes.length) {
               [...el.childNodes].forEach(recUpdate);
             }
           };
           recUpdate(document.activeElement);
-        })();
+        })(
+          [{},{},{}],
+          String.fromCodePoint,
+          (c, f = 0) => new Array(c).fill(f),
+          '(.*?)'
+        );
       </script>
     </section>
   </body>
