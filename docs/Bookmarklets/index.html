@@ -94,21 +94,21 @@
         name="MD"
         bookmarklet="Apply markdown inlines to the current input"
       >
-        ((maps, fromCodePoint, filledArray, matchAnyGroup) => {
+        ((maps, fromCodePoint, filledArray, wrapGroup) => {
           filledArray(52).map((_, i) => fromCodePoint((i < 26 ? 65 : 71) + i)).forEach(c => 
             [104,0,52].forEach((o, i) => maps[i][c] = fromCodePoint(c.codePointAt(0) + 120205 + o + (c < 'a' ? 6 : 0)))
           );
-          const mkMapper = (m) => (_, a, b) => [...(a ?? b)].map(c => m[c] ?? c).join('');
-          const mkPattern = (n) => {
-            const u = filledArray(n, '_').join('');
-            const a = filledArray(n, '\\*').join('');
-            return new RegExp(`${u}${matchAnyGroup}${u}|${a}${matchAnyGroup}${a}`, 'g');
-          }
-          const patterns = maps.map((m, i) => [mkPattern(3 - i), mkMapper(m)]);
+          const patterns = maps.map((m, i) => [
+            new RegExp(
+              ['_','\\*']
+                .map(v => wrapGroup(filledArray(3 - i, v).join(''))).join('|'),
+              'g'
+            ),
+            (_, a, b) => [...(a ?? b)].map(c => m[c] ?? c).join('')
+          ]);
           const update = (s) => {
-            for (const [pattern, mapper] of patterns) {
+            for (const [pattern, mapper] of patterns)
               s = s.replace(pattern, mapper);
-            }
             return s;
           };
           const recUpdate = (el) => {
@@ -125,7 +125,7 @@
           [{},{},{}],
           String.fromCodePoint,
           (c, f = 0) => new Array(c).fill(f),
-          '(.*?)'
+          (t) => `${t}(.*?)${t}`,
         );
       </script>
     </section>
