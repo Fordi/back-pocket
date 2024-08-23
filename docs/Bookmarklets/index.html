@@ -98,14 +98,10 @@
           const maps = [{},{},{}];
           const fcp = String.fromCodePoint;
           const fa = (c, f = 0) => new Array(c).fill(f);
-          const shiftChar = (c, ucs, lcs) => fcp(c.codePointAt(0) + (c < 'a' ? ucs : lcs));
-          fa(52).map((_, i) => fcp((i < 26 ? 65 : 71) + i)).forEach(c => {
-            [
-              [0x1d5fb, 0x1d5f5],
-              [0x1d593, 0x1d58d],
-              [0x1d5c7, 0x1d5c1],
-            ].forEach((o, i) => maps[i][c] = shiftChar(c, ...o));
-          });
+          const shiftChar = (c, ucs, lcs) => fcp(c.codePointAt(0) + 120205 + (c < 'a' ? ucs : lcs));
+          fa(52).map((_, i) => fcp((i < 26 ? 65 : 71) + i)).forEach(c => 
+            [104,0,52].forEach((o, i) => maps[i][c] = shiftChar(c, o + 6, o))
+          );
           const mkMapper = (index) => (_, a, b) => [...(a ?? b)].map(c => maps[index][c] ?? c).join('');
           const f = '(.*?)';
           const mkPattern = (n) => {
