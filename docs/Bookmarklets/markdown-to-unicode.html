@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta encoding="utf-8" />
+    <title>Bookmarklets</title>
+    <link rel="stylesheet" href="index.css" />
+    <script defer type="module" src="../build/Bookmarklets.js"></script>
+  </head>
+  <body>
+    <section>
+      <header>
+        <h1>Bookmarklets</h1>
+      </header>
+      <p>
+        Drag these to your bookmarks bar for useful tools. Click on any one to
+        preview its source code. Click on the preview to copy the source code.
+      </p>
+      <script
+        name="Markdown to Unicode"
+        bookmarklet="Apply markdown inlines to the current input as unicode replacements"
+      >
+        ((fromCodePoint, wrapGroup) => {
+          const maps = [{},{},{}];
+          for (let i = 0; i < 52; i++) {
+            const c = fromCodePoint((i < 26 ? 65 : 71) + i);
+            [104,0,52].forEach((o, j) => maps[j][c] = fromCodePoint(c.codePointAt(0) + 120205 + o + (c < 'a' ? 6 : 0)));
+          }
+          const patterns = [
+            /___(.*?)___|\*\*\*(.*?)\*\*\*/g,
+            /__(.*?)__|\*\*(.*?)\*\*/g,
+            /_(.*?)_|\*(.*?)\*/g,
+          ].map((regex, i) => [
+            regex,
+            (_, a, b) => [...(a ?? b)].map(c => maps[i][c] ?? c).join('')
+          ]);
+          const update = (s) => {
+            for (const [pattern, mapper] of patterns) {
+              s = s.replace(pattern, mapper);
+            }
+            return s;
+          };
+          const recUpdate = (el) => {
+            if (el.nodeType === Node.TEXT_NODE) {
+              el.textContent = update(el.textContent);
+            } else if (/INPUT|TEXTAREA/.test(el.nodeName)) {
+              el.value = update(el.value);
+            } else if (el.childNodes.length) {
+              [...el.childNodes].forEach(recUpdate);
+            }
+          };
+          recUpdate(document.activeElement);
+        })(
+          String.fromCodePoint,
+          (t) => `${t}(.*?)${t}`,
+        );
+      </script>
+    </section>
+  </body>
+</html>
