@@ -31780,7 +31780,8 @@ const unindent = (s) => {
 const escapeHtml = s => s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
   async (bookmarklet) => {
-    const code = bookmarklet.innerHTML.replace(/^[\s\r\n\t]*(?:\(\)[\s\r\n\t]*=>|function)[\s\r\n\t]*\{|\};[\s\r\n\t]*?$/g, '');
+    const code = bookmarklet.innerHTML.replace(/^[\s\r\n\t]*(?:\(\)[\s\r\n\t]*=>|function)[\s\r\n\t]*\{|\};[\s\r\n\t]*?$|<!\[CDATA\[|]]>/g, '');
+    console.log(code);
     const minified = escapeHtml((await minify(code)).code);
     const source = unindent(code);
     const link = document.createElement("div");

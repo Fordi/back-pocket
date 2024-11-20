@@ -12,18 +12,23 @@
         <h1>Bookmarklets</h1>
       </header>
       <p>
-        Drag these to your bookmarks bar for useful tools. Click on any one to
-        preview its source code. Click on the preview to copy the source code.
+        Drag this to your bookmarks bar. Click on the title to preview its source code. Click on the preview to copy the source code.
       </p>
       <script
         name="Markdown to Unicode"
         bookmarklet="Apply markdown inlines to the current input as unicode replacements"
-      >
+        type="text/bookmarklet"
+      ><![CDATA[
         ((fromCodePoint, wrapGroup) => {
           const maps = [{},{},{}];
           for (let i = 0; i < 52; i++) {
             const c = fromCodePoint((i < 26 ? 65 : 71) + i);
-            [104,0,52].forEach((o, j) => maps[j][c] = fromCodePoint(c.codePointAt(0) + 120205 + o + (c < 'a' ? 6 : 0)));
+            [104,0,52].forEach((o, j) => maps[j][c] = fromCodePoint(
+                120205
+                + c.codePointAt(0)
+                + o
+                + (c < 'a' ? 6 : 0)
+            ));
           }
           const patterns = [
             /___(.*?)___|\*\*\*(.*?)\*\*\*/g,
@@ -53,7 +58,7 @@
           String.fromCodePoint,
           (t) => `${t}(.*?)${t}`,
         );
-      </script>
+    ]]></script>
     </section>
   </body>
 </html>
