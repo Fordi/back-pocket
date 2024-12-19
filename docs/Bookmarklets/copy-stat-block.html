@@ -193,6 +193,47 @@
         para.innerHTML = line;
       })();
     </script>
+    
+    <script
+      name="Get D&D announcement"
+      bookmarklet="Get the announcement for the next D&D session in your clipboard for pasting into Discord"
+      type="text/bookmarklet"
+    >
+      (() => {
+        const div = Object.assign(document.createElement('div'), {
+          innerHTML: `
+            <div style="background-color: black; border-radius: 1em; padding: 1em; color: white">
+              <p>Choose a time</p>
+              <input type="time" value="19:00" step="900" />
+              <button>Copy</button>
+            </div>
+          `,
+        });
+        Object.assign(div.style, {
+          position: 'fixed',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'rgba(0, 0, 0, 0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+        });
+        document.body.appendChild(div);
+        div.querySelector('button').addEventListener('click', () => {
+          const value = div.querySelector('input').value;
+          const moments = value.split(':').map(t => parseInt(t));
+          for (let i = moments.length; i < 4; i++) {
+            moments[i] = 0;
+          }
+          navigator.clipboard.writeText(`D&D in <t:${new Date().setHours(...moments)/1000}:R>`);
+          document.body.removeChild(div);
+          return false;
+        });
+      })();
+    </script>
     </section>
   </body>
 </html>
