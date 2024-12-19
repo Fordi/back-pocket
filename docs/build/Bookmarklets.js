@@ -31781,7 +31781,6 @@ const escapeHtml = s => s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(
 await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
   async (bookmarklet) => {
     const code = bookmarklet.innerHTML.replace(/^[\s\r\n\t]*(?:\(\)[\s\r\n\t]*=>|function)[\s\r\n\t]*\{|\};[\s\r\n\t]*?$|<!\[CDATA\[|]]>/g, '');
-    console.log(code);
     const minified = escapeHtml((await minify(code)).code);
     const source = unindent(code);
     const link = document.createElement("div");
@@ -31810,7 +31809,19 @@ await Promise.all([...document.querySelectorAll("script[bookmarklet]")].map(
       if (link.classList.contains("open")) {
         link.classList.remove("open");
       } else {
-        link.classList.add("open");
+        const p = link.querySelector('pre');
+        if (!p.id) {
+          p.id = `pre_${Math.random().toString(36).slice(2)}`;
+          p.style.maxHeight = 'unset';
+          const height = p.clientHeight;
+          p.style.maxHeight = '';
+          const rule = `.bookmarklet.open > #${pre.id} { max-height: ${height}px; }`;
+          const sheet = document.createElement('style');
+          sheet.type = 'text/css';
+          sheet.textContent = rule;
+          document.head.appendChild(sheet);
+        }
+        requestAnimationFrame(() => link.classList.add("open"));
       }
       return false;
     });
