@@ -4,7 +4,7 @@
     <meta encoding="utf-8" />
     <title>Bookmarklets</title>
     <link rel="stylesheet" href="index.css" />
-    <script defer type="module" src="../build/Bookmarklets.js"></script>
+    <script defer type="module" src="./index.js"></script>
   </head>
   <body>
     <section>
@@ -16,99 +16,111 @@
         preview its source code. Click on the preview to copy the source code.
       </p>
       <script
-        type="bookmarklet"
         name="Copy stat block"
         bookmarklet="Copy a monster's stat block from D&DBeyond as Markdown" 
+        type="text/bookmarklet"
       >
-        (async () => {
-          const TurndownService = (await import('https://unpkg.com/turndown/lib/turndown.es.js')).default;
-          const td = new TurndownService();
-          const statBlockHandlers = {
-            "mon-stat-block"(block) {
-              const result = [];
-              for (const child of [...block.children]) {
-                result.push(statBlockHandlers[child.className]?.(child, block));
-              }
-              return (result.join('\n')).replace(/\n\n\n+/g, '\n\n');
-            },
-            "mon-stat-block__header"(header, block) {
-              const result = [];
-              for (const child of [...header.children]) {
-                result.push(statBlockHandlers[child.className]?.(child, header, block));
-              }
-              return result.join("\n\n");
-            },
-            "mon-stat-block__name"(name, header, block) {
-              return `## ${name.textContent.trim()}`;
-            },
-            "mon-stat-block__meta"(meta, header, block) {
-              return `_${meta.textContent.trim()}_`;
-            },
-            "mon-stat-block__separator"() {
-              return "-----";
-            },
-            "mon-stat-block__attributes"(a) {
-              const result = [];
-              for (const attr of [...a.querySelectorAll('.mon-stat-block__attribute')]) {
-                const label = attr.querySelector('.mon-stat-block__attribute-label').textContent.trim();
-                const value = attr.querySelector('.mon-stat-block__attribute-data-value')?.textContent?.trim?.();
-                const extra = attr.querySelector('.mon-stat-block__attribute-data-extra')?.textContent?.trim?.();
-                result.push(`- _**${label}**_: ${value ?? ''} ${extra ? `_${extra}_` : ''}`);
-              }
-              result.push('');
-              return result.join('\n');
-            },
-            "mon-stat-block__stat-block"(a) {
-              const result = [];
-              const stats = [...a.querySelectorAll('.ability-block__stat')];
-              const columns = stats.map(stat => stat.querySelector('.ability-block__heading').textContent.trim());
-              const values = stats.map(stat => stat.querySelector('.ability-block__data').textContent.trim().replace(/\s\s+/, ' '));
-              const widths = new Array(columns.length).fill(0);
-              for (let i = 0; i < widths.length; i++) {
-                widths[i] = Math.max(widths[i], columns[i].length, values[i].length);
-              }
-            
-              result.push(`| ${columns.map((v, i) => v.padEnd(widths[i])).join(' | ')} |`);
-              result.push(`|-${widths.map((v, i) => ''.padEnd(v, '-')).join('-|-')}-|`);
-              result.push(`| ${values.map((v, i) => v.padEnd(widths[i])).join(' | ')} |`);
-              result.push('');
-              return result.join('\n');
-            },
-            "mon-stat-block__tidbits"(a) {
-              const result = [];
-              for (const attr of [...a.querySelectorAll('.mon-stat-block__tidbit')]) {
-                const label = attr.querySelector('.mon-stat-block__tidbit-label').textContent.trim();
-                const value = attr.querySelector('.mon-stat-block__tidbit-data')?.textContent?.trim?.();
-                result.push(`- _**${label}**_: ${value ?? ''}`);
-              }
-              result.push('');
-              return result.join('\n');
-            },
-            "mon-stat-block__description-blocks"(a) {
-              const result = [];
-              for (const block of a.childNodes) {
-                result.push(statBlockHandlers[block.className]?.(block));
-              }
-              return (result.join('\n\n') + '\n').replace(/\n\n\n+/g, '\n\n');
-            },
-            "mon-stat-block__description-block"(a) {
-              const result = [];
-              for (const block of a.childNodes) {
-                result.push(statBlockHandlers[block.className]?.(block));
-              }
-              return (result.join('\n\n') + '\n').replace(/\n\n\n+/g, '\n\n');
-            },
-            "mon-stat-block__description-block-heading"(a) {
-              return `### ${a.textContent.trim()}`;
-            },
-            "mon-stat-block__description-block-content"(a) {
-              return ' -  ' + td.turndown(a.innerHTML).split('\n').join('\n    ');
+      (async () => {
+        const TurndownService = (await import('https://unpkg.com/turndown/lib/turndown.es.js')).default;
+        const td = new TurndownService();
+        const statBlockHandlers = {
+          "mon-stat-block"(block) {
+            const result = [];
+            for (const child of [...block.children]) {
+              result.push(statBlockHandlers[child.className]?.(child, block));
             }
-          };
+            
+            return (result.join('\n'))
+              .replace(/\n\n\n+/g, '\n\n')
+              .replace(/(\n- .*)\n\n+(-)/g, '$1\n$2');
+          },
+          "mon-stat-block__header"(header, block) {
+            const result = [];
+            for (const child of [...header.children]) {
+              result.push(statBlockHandlers[child.className]?.(child, header, block));
+            }
+            return result.join("\n\n");
+          },
+          "mon-stat-block__name"(name, header, block) {
+            const title = name.textContent.trim();
+            const image = block.closest('.monster-details').querySelector('.details-aside>.image img').src;
+            return `## [${title}](${location.toString()})\n\n![${title}](${image})`;
+          },
+          "mon-stat-block__meta"(meta, header, block) {
+            return `- _${meta.textContent.trim()}_`;
+          },
+          "mon-stat-block__separator"() {
+            return "";
+          },
+          "mon-stat-block__attributes"(a) {
+            const result = [];
+            for (const attr of [...a.querySelectorAll('.mon-stat-block__attribute')]) {
+              const label = attr.querySelector('.mon-stat-block__attribute-label').textContent.trim();
+              const value = attr.querySelector('.mon-stat-block__attribute-data-value')?.textContent?.trim?.();
+              const extra = attr.querySelector('.mon-stat-block__attribute-data-extra')?.textContent?.trim?.();
+              if (!extra && !value) {
+                continue;
+              }
+              result.push(`- _**${label}**_: ${value ?? ''} ${extra ? `_${extra}_` : ''}`);
+            }
+            result.push('');
+            return result.join('\n');
+          },
+          "mon-stat-block__stat-block"(a) {
+            const result = [];
+            const stats = [...a.querySelectorAll('.ability-block__stat')];
+            const columns = stats.map(stat => stat.querySelector('.ability-block__heading').textContent.trim());
+            const values = stats.map(stat => stat.querySelector('.ability-block__data').textContent.trim().replace(/\s\s+/, ' '));
+            const widths = new Array(columns.length).fill(0);
+            for (let i = 0; i < widths.length; i++) {
+              widths[i] = Math.max(widths[i], columns[i].length, values[i].length);
+            }
           
-          const block = document.querySelector('.mon-stat-block');
-          navigator.clipboard.writeText((statBlockHandlers[block.className]?.(block)));
-        })();
+            result.push(`| ${columns.map((v, i) => v.padEnd(widths[i])).join(' | ')} |`);
+            result.push(`|-${widths.map((v, i) => ''.padEnd(v, '-')).join('-|-')}-|`);
+            result.push(`| ${values.map((v, i) => v.padEnd(widths[i])).join(' | ')} |`);
+            result.push('');
+            return result.join('\n');
+          },
+          "mon-stat-block__tidbits"(a) {
+            const result = [];
+            for (const attr of [...a.querySelectorAll('.mon-stat-block__tidbit')]) {
+              const label = attr.querySelector('.mon-stat-block__tidbit-label').textContent.trim();
+              const value = attr.querySelector('.mon-stat-block__tidbit-data')?.textContent?.trim?.();
+              if (!value || value === '--') {
+                continue;
+              }
+              result.push(`- _**${label}**_: ${value ?? ''}`);
+            }
+            result.push('');
+            return result.join('\n');
+          },
+          "mon-stat-block__description-blocks"(a) {
+            const result = [];
+            for (const block of a.childNodes) {
+              result.push(statBlockHandlers[block.className]?.(block));
+            }
+            return (result.join('\n\n') + '\n').replace(/\n\n\n+/g, '\n\n');
+          },
+          "mon-stat-block__description-block"(a) {
+            const result = [];
+            for (const block of a.childNodes) {
+              result.push(statBlockHandlers[block.className]?.(block));
+            }
+            return (result.join('\n\n') + '\n').replace(/\n\n\n+/g, '\n\n');
+          },
+          "mon-stat-block__description-block-heading"(a) {
+            return `### ${a.textContent.trim()}`;
+          },
+          "mon-stat-block__description-block-content"(a) {
+            return '-  ' + td.turndown(a.innerHTML).split('\n').join('\n    ');
+          }
+        };
+        
+        const block = document.querySelector('.mon-stat-block');
+        navigator.clipboard.writeText((statBlockHandlers[block.className]?.(block)));
+        // console.log((statBlockHandlers[block.className]?.(block)));
+      })();
     </script>
     </section>
   </body>
