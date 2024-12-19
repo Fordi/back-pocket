@@ -122,6 +122,67 @@
         // console.log((statBlockHandlers[block.className]?.(block)));
       })();
     </script>
+    <script
+      name="Reset Monster"
+      bookmarklet="Clear out editors for a new monster"
+      type="text/bookmarklet"
+    >
+      (() => {
+        const editorFor = (field) => tinymce.editors.find(({ editorContainer }) => editorContainer.closest(`.ddb-homebrew-create-form-fields-item-${field}`) !== null);
+        [
+          'special-traits-description',
+          'actions-description',
+          'bonus-actions-container',
+          'reactions-description',
+          'monster-description',
+          'legendary-actions-container',
+          'mythic-actions-container',
+          'lair-container',
+        ].forEach(field => editorFor(field).setContent(''));
+      })();
+    </script>
+    <script
+      name="Fix roll props"
+      bookmarklet="Update the roll properties on the current line"
+      type="text/bookmarklet"
+    >
+      (() => {
+        const active = document.activeElement.closest('.markup-editor');
+        const editor = tinymce.editors.find(({ editorContainer }) => editorContainer.closest('.markup-editor') === active);
+        const para = editor.selection.getStart();
+        let line = para.textContent.replace(/\[rollable\]([^;]+);.*?\[\/rollable]/g, '$1');
+        let actionName;
+        line = line.replace(/^([^\.]+)\./, (_, name) => {
+          actionName = name;
+          return `<strong><em>${name}.</strong></em>`
+        });
+        line = line.replace(/([\. >])([+-]\d+) to hit([, ])/g, (_, pre, mod, post) => {
+          return `${pre}[rollable]${mod};{"diceNotation":"1d20${mod}","rollType":"to hit","rollAction":"${actionName}"}[/rollable] to hit${post}`;
+        });
+        line = line.replace(/(\d*d\d+(?:[+-]\d+)?)([\w\s]+)damage/g, (_, roll, type) => {
+          return `[rollable]${roll};{"diceNotation":"${roll}","rollType":"damage","rollAction":"${actionName}"}[/rollable]${type}damage`
+        });
+        para.innerHTML = line;
+      })();
+    </script>
+    <script
+      name="Strip roll props"
+      bookmarklet="Remove the roll properties on the current line"
+      type="text/bookmarklet"
+    >
+      (() => {
+        const active = document.activeElement.closest('.markup-editor');
+        const editor = tinymce.editors.find(({ editorContainer }) => editorContainer.closest('.markup-editor') === active);
+        const para = editor.selection.getStart();
+        let line = para.textContent.replace(/\[rollable\]([^;]+);.*?\[\/rollable]/g, '$1');
+        let actionName;
+        line = line.replace(/^([^\.]+)\./, (_, name) => {
+          actionName = name;
+          return `<strong><em>${name}.</strong></em>`
+        });
+        para.innerHTML = line;
+      })();
+    </script>
     </section>
   </body>
 </html>
