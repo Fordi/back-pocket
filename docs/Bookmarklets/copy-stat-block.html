@@ -143,7 +143,7 @@
     </script>
     <script
       name="Fix roll props"
-      bookmarklet="Update the roll properties on the current line"
+      bookmarklet="Update the roll properties on the current line; e.g.,"
       type="text/bookmarklet"
     >
       (() => {
@@ -165,9 +165,19 @@
         para.innerHTML = line;
       })();
     </script>
+    <p>
+      <blockquote>
+        Bite. +2 to hit, 1d4+2 piercing damage.
+      </blockquote>
+      becomes 
+      <blockquote>
+        <strong><em>Bite.</em></strong> [rollable]+2;{"diceNotation":"1d20+2","rollType":"to hit","rollAction":"Bite"}[/rollable] to hit, [rollable]1d4+2;{"diceNotation":"1d4+2","rollType":"damage","rollAction":"Bite"}[/rollable] piercing damage.
+      </blockquote>
+    </p>
+
     <script
       name="Strip roll props"
-      bookmarklet="Remove the roll properties on the current line"
+      bookmarklet="Remove the roll properties on the current line.  Basically undo the 'Fix roll props' bookmarklet"
       type="text/bookmarklet"
     >
       (() => {
