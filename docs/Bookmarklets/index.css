@@ -45,7 +45,7 @@ section {
   transition: none;
 }
 .bookmarklet.open > pre {
-  padding: 1em 1em;
+  padding: 1em 1em 2em 1em;
   border-radius: 1em;
   max-height: unset;
   overflow-x: auto;
