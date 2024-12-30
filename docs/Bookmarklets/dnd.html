@@ -236,12 +236,13 @@
     </script>
     <script
       name="Bonus -> Score"
-      bookmarklet="Convert bonus values to ability scores"
+      bookmarklet="Convert bonus values to ability scores.  Also calculates passive perception."
       type="text/bookmarklet"
     >
       (() => {
         const stats = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-        const table = [-5, -5, -4, -4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10];
+        const table = [-Infinity, -5, -4, -4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10];
+        let wisdom;
         stats.forEach((n) => { 
           const field = document.getElementById(`field-${n}`);
           if (/^[-+]/.test(field.value)) {
@@ -249,7 +250,12 @@
             const options = table.map((v, i) => [v, i]).filter(([v]) => v === val).map(([_, i]) => i);
             field.value = options[Math.random()*options.length|0];
           }
+          if (n === 'wisdom') {
+            wisdom = parseInt(field.value);
+          }
         });
+        const pp = document.getElementById('field-passive-perception');
+        pp.value = 10 + table[wisdom];
       })();
     </script>
     </section>
