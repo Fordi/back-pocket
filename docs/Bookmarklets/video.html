@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta encoding="utf-8" />
+    <title>Bookmarklets</title>
+    <link rel="stylesheet" href="index.css" />
+    <script defer type="module" src="./index.js"></script>
+  </head>
+  <body>
+    <section>
+      <header>
+        <h1>Bookmarklets</h1>
+      </header>
+      <p>
+        Drag these to your bookmarks bar for useful tools. Click on any one to
+        preview its source code. Click on the preview to copy the source code.
+      </p>
+      <script
+        name="Faster"
+        bookmarklet="Speed up video by 1.25"
+        type="text/bookmarklet"
+      >
+        [document, ...[...document.querySelectorAll('iframe')].map(iframe => iframe.contentDocument).filter(a => a)].forEach(document => {
+          [...document.querySelectorAll('video')].forEach(v => {
+            v.playbackRate = Math.round(v.playbackRate * 1.25 * 10) / 10;
+            const text = document.createElement('div');
+            const vp = Math.sqrt(v.offsetWidth * v.offsetHeight)
+            Object.assign(text.style, {
+              position: 'absolute',
+              fontSize: `${vp/30}px`,
+              left: `${vp/30}px`,
+              top: `${vp/30}px`,
+              color: 'white',
+              textShadow: "1px 1px 3px black",
+              opacity: 1,
+            });
+            text.style.transition = 'opacity 1s';
+            text.textContent = `${(v.playbackRate * 100).toFixed(0)}%`;
+            v.offsetParent.appendChild(text);
+            setTimeout(() => {
+              text.style.opacity = 0;
+            }, 1000)
+            setTimeout(() => {
+              v.offsetParent.removeChild(text);
+            }, 2000);
+          });
+        });
+      </script>
+      <script
+        name="Slower"
+        bookmarklet="Slow down video by 1.25"
+        type="text/bookmarklet"
+      >
+        [document, ...[...document.querySelectorAll('iframe')].map(iframe => iframe.contentDocument).filter(a => a)].forEach(document => {
+          [...document.querySelectorAll('video')].forEach(v => {
+            v.playbackRate = Math.round(v.playbackRate / 1.25 * 10) / 10;
+            const text = document.createElement('div');
+            const vp = Math.sqrt(v.offsetWidth * v.offsetHeight)
+            Object.assign(text.style, {
+              position: 'absolute',
+              fontSize: `${vp/30}px`,
+              left: `${vp/30}px`,
+              top: `${vp/30}px`,
+              color: 'white',
+              textShadow: "1px 1px 3px black",
+              opacity: 1,
+            });
+            text.style.transition = 'opacity 1s';
+            text.textContent = `${(v.playbackRate * 100).toFixed(0)}%`;
+            v.offsetParent.appendChild(text);
+            setTimeout(() => {
+              text.style.opacity = 0;
+            }, 1000)
+            setTimeout(() => {
+              v.offsetParent.removeChild(text);
+            }, 2000);
+          });
+        });
+      </script>
+      <script
+        name="1:1"
+        bookmarklet="Reset video playback speed"
+        type="text/bookmarklet"
+        >
+          [document, ...[...document.querySelectorAll('iframe')].map(iframe => iframe.contentDocument).filter(a => a)].forEach(document => {
+            [...document.querySelectorAll('video')].forEach(v => {
+              v.playbackRate = 1;
+              const text = document.createElement('div');
+              const vp = Math.sqrt(v.offsetWidth * v.offsetHeight)
+              Object.assign(text.style, {
+                position: 'absolute',
+                fontSize: `${vp/30}px`,
+                left: `${vp/30}px`,
+                top: `${vp/30}px`,
+                color: 'white',
+                textShadow: "1px 1px 3px black",
+                opacity: 1,
+              });
+              text.style.transition = 'opacity 1s';
+              text.textContent = `${(v.playbackRate * 100).toFixed(0)}%`;
+              v.offsetParent.appendChild(text);
+              setTimeout(() => {
+                text.style.opacity = 0;
+              }, 1000)
+              setTimeout(() => {
+                v.offsetParent.removeChild(text);
+              }, 2000);
+            });
+          });
+      </script>
+    </section>
+  </body>
+</html>
