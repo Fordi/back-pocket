@@ -33,7 +33,9 @@ const lookRotation = ({ direction, up }, result = new Cesium.Quaternion()) => {
 const viewer = new Cesium.Viewer("cesiumContainer");
 
 // Just copy the frustum from the camera for now
-const frustum = viewer.camera.frustum;
+const frustum = viewer.camera.frustum.clone(new Cesium.PerspectiveFrustum());
+frustum.near = 7.5;
+frustum.far = 75.0;
 
 // The one we want to see from the real camera
 const cameraToSee = {
@@ -53,29 +55,51 @@ const cameraToBe = {
   }
 };
 
+const cameraInstance = new Cesium.GeometryInstance({
+  geometry: new Cesium.FrustumGeometry({
+    frustum,
+    origin: cameraToSee.origin,
+    orientation: lookRotation(cameraToSee.orientation),
+  }),
+  attributes : {
+    color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 1.0, 1.0, 1.0))
+  },
+  id : 'myFrustum'
+});
+
+
+
+const RED = Cesium.Material.fromType(Cesium.Material.RimLightingType, {
+  color: new Cesium.Color(0.0, 0.7, 0.9, 0.5),
+  rimColor: new Cesium.Color(1.0, 0.7, 0.9, 0.0),
+  width: 1.0,
+});
+
 // a mock camera object we could manipulate later on
 const mockCamera = new Cesium.Primitive({
-  geometryInstances: new Cesium.GeometryInstance({
-    geometry: new Cesium.FrustumGeometry({
-      frustum,
-      origin: cameraToSee.origin,
-      orientation: lookRotation(cameraToSee.orientation),
-    }),
-    attributes : {
-      color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 1.0, 1.0, 1.0))
-    },
-    id : 'myFrustum'
-  }),
+  geometryInstances: [cameraInstance],
   appearance: new Cesium.MaterialAppearance({
-    material: Cesium.Material.fromType('Checkerboard'),
+    material: RED,
   }),
 });
+
 
 // Add the geometry to the scene
 viewer.scene.primitives.add(mockCamera);
 
 // Fly to the vantage point
-viewer.camera.flyTo({ 
-  destination: cameraToBe.origin,
-  orientation: cameraToBe.orientation,
-});
+const go = () => {
+  viewer.camera.flyTo({ 
+    destination: cameraToBe.origin,
+    orientation: cameraToBe.orientation,
+  });
+  setTimeout(() => {
+    viewer.camera.flyTo({
+      destination: cameraToSee.origin,
+      orientation: cameraToSee.orientation,
+    });
+    
+  }, 5000);
+};
+go();
+setInterval(go, 10000);
