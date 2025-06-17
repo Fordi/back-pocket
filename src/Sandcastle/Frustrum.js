@@ -1,9 +1,10 @@
-// Like Unity's Quaternion.LookRotation.  forward/up equivalent to camera's .direction/.up
+// Scratch vars for lookRotation
 const xLeft = new Cesium.Cartesian3();
 const yUp = new Cesium.Cartesian3();
 const zForward = new Cesium.Cartesian3();
 const orientationMatrix = new Cesium.Matrix3();
 
+// Like Unity's Quaternion.LookRotation.
 const lookRotation = ({ direction, up }, result = new Cesium.Quaternion()) => {
   // Build axes
   // zForward = || zForward ||
@@ -52,28 +53,28 @@ const cameraToBe = {
   }
 };
 
-const mockCamera = new Cesium.GeometryInstance({
-    geometry: new Cesium.FrustumGeometry({
-    frustum,
-    origin: cameraToSee.origin,
-    orientation: lookRotation(cameraToSee.orientation),
+// a mock camera object we could manipulate later on
+const mockCamera = new Cesium.Primitive({
+    geometryInstances: new Cesium.GeometryInstance({
+      geometry: new Cesium.FrustumGeometry({
+      frustum,
+      origin: cameraToSee.origin,
+      orientation: lookRotation(cameraToSee.orientation),
+    }),
+    attributes : {
+      color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 1.0, 1.0, 1.0))
+    },
+    id : 'myFrustum'
   }),
-  attributes : {
-    color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 1.0, 1.0, 1.0))
-  },
-  id : 'myFrustum'
-});
-
-console.log(mockCamera);
-
-// Add the geometry
-viewer.scene.primitives.add(new Cesium.Primitive({
-  geometryInstances: mockCamera,
   appearance: new Cesium.MaterialAppearance({
     material: Cesium.Material.fromType('Checkerboard'),
   }),
-}));
+});
 
+// Add the geometry to the scene
+viewer.scene.primitives.add(mockCamera);
+
+// Fly to the vantage point
 viewer.camera.flyTo({ 
   destination: cameraToBe.origin,
   orientation: cameraToBe.orientation,
