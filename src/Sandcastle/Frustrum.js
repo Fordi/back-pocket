@@ -55,8 +55,8 @@ const cameraToBe = {
 
 // a mock camera object we could manipulate later on
 const mockCamera = new Cesium.Primitive({
-    geometryInstances: new Cesium.GeometryInstance({
-      geometry: new Cesium.FrustumGeometry({
+  geometryInstances: new Cesium.GeometryInstance({
+    geometry: new Cesium.FrustumGeometry({
       frustum,
       origin: cameraToSee.origin,
       orientation: lookRotation(cameraToSee.orientation),
