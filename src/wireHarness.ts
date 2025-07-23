@@ -11,13 +11,14 @@ import {
 } from "restify-errors";
 
 
-type HarnessSpec<T extends any[], R> = {
+type HarnessSpec<T extends any[], R, I = R> = {
   method: "get" | "put" | "post" | "del" | "opts" | "head";
   uri: string;
   guards: RequestHandlerType[];
   getArgs?: (req: Request) => T;
-  execute: (...args: T) => Promise<R>;
-  addHeaders?: (req: Request, result: R) => Record<string, string>;
+  execute: (...args: T) => Promise<I>;
+  marshall: (result: Awaited<I>) => Promise<R>;
+  addHeaders?: (req: Request, result: Awaited<R>) => Record<string, string>;
 };
 
 type ErrorConstructor<T extends Error = Error> = new (...args: any[]) => T;
@@ -29,20 +30,20 @@ wireHarness.addErrorHandler = <T extends Error, R = any>(Type: ErrorConstructor<
   wireHarness.errorHandlers.push([Type, handle as unknown as ErrorHandler]);
 };
 
-function wireHarness<T extends any[], R>({
+function wireHarness<T extends any[], R, I>({
   method, uri, guards, getArgs, execute, addHeaders, marshall
-}: HarnessSpec<T, R>) {
+}: HarnessSpec<T, R, I>) {
   const main = async (req: Request, res: Response, next: Next) => {
     const args = getArgs?.(req) ?? ([] as unknown as T);
     try {
-      let data = await execute(...args);
+      let data: Awaited<I | R> = await execute(...args);
       if (data === undefined || data === null) {
         throw new ResourceNotFoundError();
       }
       if (marshall) {
-        data = marshall(data);
+        data = await marshall(data);
       }
-      const headers = addHeaders?.(req, data) ?? {};
+      const headers = addHeaders?.(req, data as Awaited<R>) ?? {};
       res.json(data, headers);
       next();
     } catch (err) {
@@ -55,7 +56,7 @@ function wireHarness<T extends any[], R>({
         // Check for errors we raise ourselves via internal error handling.
         if (err instanceof RestError || err instanceof HttpError) {
           if (err instanceof ResourceNotFoundError) {
-            err = new ResourceNotFoundError(`Resource Not Found: ${url ?? ""}`);
+            return new ResourceNotFoundError(`Resource Not Found: ${url ?? ""}`);
           }
           return err;
         }
@@ -75,7 +76,6 @@ function wireHarness<T extends any[], R>({
 
         // Otherwise, this was an unexpected error, log it and send a default error.
         console.log(err);
-        console.log(err.stack);
         return new InternalServerError("Internal server error");
     }
 
@@ -94,16 +94,18 @@ function wireHarness<T extends any[], R>({
   return main;
 }
 
-/** Example:
-
-export const getUserWidget = wireHarness({
-  method: "get",
-  uri: Endpoints.Widget,
-  guards: [AuthorizationServices.admin],
-  getArgs: (req: Request): [number, number, string] => [
-    Number(req.params.userId),
-  ],
-  execute: Database.getUserWidget,
-  marshall: widgetFromProps,
-});
-*/
+/**
+ * Example:
+ * ```
+ * export const getUserWidget = wireHarness({
+ *   method: "get",
+ *   uri: Endpoints.Widget,
+ *   guards: [AuthorizationServices.admin],
+ *   getArgs: (req: Request): [number, number, string] => [
+ *     Number(req.params.userId),
+ *   ],
+ *   execute: Database.getUserWidget,
+ *   marshall: widgetFromProps,
+ * });
+ * ```
+ */
