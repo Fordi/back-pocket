@@ -24,6 +24,11 @@ type HarnessSpec<T extends any[], R, I = R> = {
 type ErrorConstructor<T extends Error = Error> = new (...args: any[]) => T;
 type ErrorHandler<T extends Error = Error, R = any> = (err: T) => R;
 type ErrorHandlerPair<T extends Error = Error, R = any> = [ErrorConstructor<T>, ErrorHandler<T, R>];
+
+type API<T extends any[] = any[], R = any, I = R> = ((...args: T) => Promise<R>) & HarnessSpec<T, R, I> & {
+  register: (server: Server) => void;
+};
+
 wireHarness.errorHandlers = [] as (ErrorHandlerPair[]);
 
 wireHarness.addErrorHandler = <T extends Error, R = any>(Type: ErrorConstructor<T>, handle: ErrorHandler<T, R>) => {
@@ -34,20 +39,20 @@ function wireHarness<T extends any[], R, I>({
   method, uri, guards, args, execute, marshall, headers,
 }: HarnessSpec<T, R, I>) {
   const main = async (req: Request, res: Response, next: Next) => {
-    const args = getArgs?.(req) ?? ([] as unknown as T);
+    const argList = args?.(req) ?? ([] as unknown as T);
     try {
-      let data: Awaited<I | R> = await execute(...args);
+      let data: Awaited<I | R> = await execute(...argList);
       if (data === undefined || data === null) {
         throw new ResourceNotFoundError();
       }
       if (marshall) {
         data = await marshall(data);
       }
-      const headers = {
+      const headerObj = {
         "content-type": "application/json",
         ...headers?.(req, data as Awaited<R>)
       };
-      res.json(data, headers);
+      res.json(data, headerObj);
       next();
     } catch (err) {
       const { url } = req;
@@ -101,6 +106,12 @@ function wireHarness<T extends any[], R, I>({
   return main;
 }
 
+wireHarness.registerForModule = (...apis: API[]) => (server: Server) => {
+  for (const api of apis) {
+    api.register(server);
+  }
+};
+
 /**
  * Example:
  * ```
@@ -114,5 +125,7 @@ function wireHarness<T extends any[], R, I>({
  *   execute: Database.getUserWidget,
  *   marshall: widgetFromProps,
  * });
+ *
+ * export const register = wireHarness.registerForModule(getUserWidget);
  * ```
  */
