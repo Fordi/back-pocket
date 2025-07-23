@@ -90,6 +90,7 @@ function wireHarness<T extends any[], R, I>({
     getArgs,
     execute,
     register,
+    marshall,
   });
   return main;
 }
