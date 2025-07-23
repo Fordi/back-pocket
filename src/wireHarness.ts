@@ -15,10 +15,10 @@ type HarnessSpec<T extends any[], R, I = R> = {
   method: "get" | "put" | "post" | "del" | "opts" | "head";
   uri: string;
   guards: RequestHandlerType[];
-  getArgs?: (req: Request) => T;
+  args?: (req: Request) => T;
   execute: (...args: T) => Promise<I>;
   marshall: (result: Awaited<I>) => Promise<R>;
-  addHeaders?: (req: Request, result: Awaited<R>) => Record<string, string>;
+  headers?: (req: Request, result: Awaited<R>) => Record<string, string>;
 };
 
 type ErrorConstructor<T extends Error = Error> = new (...args: any[]) => T;
@@ -31,7 +31,7 @@ wireHarness.addErrorHandler = <T extends Error, R = any>(Type: ErrorConstructor<
 };
 
 function wireHarness<T extends any[], R, I>({
-  method, uri, guards, getArgs, execute, addHeaders, marshall
+  method, uri, guards, args, execute, marshall, headers,
 }: HarnessSpec<T, R, I>) {
   const main = async (req: Request, res: Response, next: Next) => {
     const args = getArgs?.(req) ?? ([] as unknown as T);
@@ -43,13 +43,16 @@ function wireHarness<T extends any[], R, I>({
       if (marshall) {
         data = await marshall(data);
       }
-      const headers = addHeaders?.(req, data as Awaited<R>) ?? {};
+      const headers = {
+        "content-type": "application/json",
+        ...headers?.(req, data as Awaited<R>)
+      };
       res.json(data, headers);
       next();
     } catch (err) {
       const { url } = req;
       if (!err) {
-          console.log(`Unknown error with url: ${url}`);
+          console.warn(`Unknown error with url: ${url}`);
           return new InternalServerError("Internal server error");
         }
 
@@ -61,6 +64,7 @@ function wireHarness<T extends any[], R, I>({
           return err;
         }
 
+        // Check for known error types
         for (const [Type, handler] of wireHarness.errorHandlers) {
           if (err instanceof Type) {
             try {
@@ -75,7 +79,7 @@ function wireHarness<T extends any[], R, I>({
         }
 
         // Otherwise, this was an unexpected error, log it and send a default error.
-        console.log(err);
+        console.warn(err);
         return new InternalServerError("Internal server error");
     }
 
@@ -83,14 +87,16 @@ function wireHarness<T extends any[], R, I>({
   const register = (server: Server) => {
     server[method].call(server, uri, ...guards, main);
   };
+  // Everything is included for testability
   Object.assign(main, {
     method,
     uri,
     guards,
-    getArgs,
+    args,
     execute,
-    register,
     marshall,
+    headers,
+    register,
   });
   return main;
 }
