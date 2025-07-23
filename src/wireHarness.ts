@@ -30,14 +30,17 @@ wireHarness.addErrorHandler = <T extends Error, R = any>(Type: ErrorConstructor<
 };
 
 function wireHarness<T extends any[], R>({
-  method, uri, guards, getArgs, execute, addHeaders
+  method, uri, guards, getArgs, execute, addHeaders, marshall
 }: HarnessSpec<T, R>) {
   const main = async (req: Request, res: Response, next: Next) => {
     const args = getArgs?.(req) ?? ([] as unknown as T);
     try {
-      const data = await execute(...args);
+      let data = await execute(...args);
       if (data === undefined || data === null) {
         throw new ResourceNotFoundError();
+      }
+      if (marshall) {
+        data = marshall(data);
       }
       const headers = addHeaders?.(req, data) ?? {};
       res.json(data, headers);
@@ -91,15 +94,16 @@ function wireHarness<T extends any[], R>({
   return main;
 }
 
-/* Sample */
-export const getUserNotes1 = wireHarness({
+/** Example:
+
+export const getUserWidget = wireHarness({
   method: "get",
-  uri: '/userNotes',
+  uri: Endpoints.Widget,
   guards: [AuthorizationServices.admin],
   getArgs: (req: Request): [number, number, string] => [
     Number(req.params.userId),
-    getOwnId(req) ?? 1,
-    req.body.note ?? "",
   ],
-  execute: Database.addUserNote,
+  execute: Database.getUserWidget,
+  marshall: widgetFromProps,
 });
+*/
