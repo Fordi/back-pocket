@@ -7,7 +7,7 @@
     "build:bookmarklets": "rollup -c rollup/Bookmarklets.js",
     "build": "npm run build:bookmarklets",
     "serve": "http-server docs",
-    "test": "node --test",
+    "test": "node --test --experimental-test-coverage --report-dir=./src",
     "coverage": "ntc"
   },
   "author": "",
