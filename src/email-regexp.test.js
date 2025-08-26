@@ -91,6 +91,9 @@ const validQuotedAddresses = [
   `"a?b(c)d,e:f;g<h>i[j\\k]l"@example.com`,
   // Partially quoted is allowed, as long as separated by .
   `just."weird but".fine@example.com`,
+  `"For some reason,
+This is perfectly valid.
+Don't ask me."@wat.com`
 ];
 
 const validIpDomains = [
@@ -105,18 +108,19 @@ const valids = [validAddresses, validQuotedAddresses, validIpDomains, validUnico
 const invalids = [invalidAddresses];
 const emailRegex = createEmailRegex();
 describe(`createEmailRegex()`, () => {
-  it("Should test true only for valid email", () => {  
-    for (const group of valids) {
-      for (const address of group) {
+  for (const group of valids) {
+    for (const address of group) {
+      it(`should return true for \`${address}\``, () => {
         strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: valid`);
-      }
+      });
     }
-  });
-  it("Should test false for invalid email", () => {
-    for (const group of invalids) {
-      for (const address of group) {
+  }
+
+  for (const group of invalids) {
+    for (const address of group) {
+      it(`should return false for \`${address}\``, () => {
         strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: invalid`);
-      }
+      });
     }
-  });
+  }
 });

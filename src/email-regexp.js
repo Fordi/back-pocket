@@ -2,11 +2,13 @@ const localPart = () => {
   const nonAscii = `\u0100-\u{10FFFF}`;
   const char = `[\\x00-\\x7F${nonAscii}]`;
   // char, without 0-31 (CTL), SPACE, (, ), <, >, @, comma, ;, :, \, ", ., [, ] (collectively, SPECIALS)
-  const atomChar = `[!#-'*+\\-/0-9=?A-Z\\^_\`a-z\\{|\\}~${nonAscii}]`;
+  // const atomChar = `[!#-'*+\\-/0-9=?A-Z\\^_\`a-z\\{|\\}~${nonAscii}]`;
+  //                    nul-spc     "    (    )    ,    .    : ; <      >    @    [  \  ]   ...
+  const atomChar = `[^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x80-\\xff]`;
   const atom = `${atomChar}+`;
   const linearWhiteSpace = `\\r\\n[\\s\\t]*`;
-
-  const quotedChar = `[\\x00-\\x09\\x0B-\\x20!#-/0-9:-@A-Z\\[\\]-\`a-z\\{-~\\x7F${nonAscii}]`;
+  //                       \n   "    \
+  const quotedChar = `[^\\x0d\\x22\\x5c]`;
   const escape = `\\\\`;
   const quotedEscapeSequence = `${escape}${char}`;
   const quoted = `"(?:${quotedChar}|${linearWhiteSpace}|${quotedEscapeSequence})*"`;
@@ -38,3 +40,4 @@ export const createEmailRegex = () => {
   const addrSpec = `(${localPart()})@(${domainPart()})`;
   return new RegExp(`^${addrSpec}$`, "u");
 };
+console.log(`(${localPart()})@(${domainPart()})`);
