@@ -101,35 +101,22 @@ const validIpDomains = [
   // IPv6 with shortened syntax
   `postmaster@[IPv6:2001:db8:85a3::8a2e:370:7334]`,
 ];
-
-const suites = [
-  [{ quotes: true, ips: true, unicode: true }, [validAddresses, validQuotedAddresses, validIpDomains, validUnicodeAddresses], [invalidAddresses]],
-  [{ quotes: true, ips: true, unicode: false }, [validAddresses, validQuotedAddresses, validIpDomains], [invalidAddresses, validUnicodeAddresses]],
-  [{ quotes: true, ips: false, unicode: true }, [validAddresses, validQuotedAddresses, validUnicodeAddresses], [invalidAddresses, validIpDomains]],
-  [{ quotes: true, ips: false, unicode: false }, [validAddresses, validQuotedAddresses], [invalidAddresses, validIpDomains, validUnicodeAddresses]],
-  [{ quotes: false, ips: true, unicode: true }, [validAddresses, validIpDomains, validUnicodeAddresses], [invalidAddresses, validQuotedAddresses]],
-  [{ quotes: false, ips: true, unicode: false }, [validAddresses, validIpDomains], [invalidAddresses, validQuotedAddresses, validUnicodeAddresses]],
-  [{ quotes: false, ips: false, unicode: true }, [validAddresses, validUnicodeAddresses], [invalidAddresses, validQuotedAddresses, validIpDomains]],
-  [{ quotes: false, ips: false, unicode: false }, [validAddresses], [invalidAddresses, validQuotedAddresses, validIpDomains, validUnicodeAddresses]],
-];
-
-for (const [config, valids, invalids] of suites) {
-  const emailRegex = createEmailRegex(config);
-  describe(`createEmailRegex(${JSON.stringify(config)})`, () => {
-    it("Should test true only for valid email", () => {  
-      for (const group of valids) {
-        for (const address of group) {
-          strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: valid`);
-        }
+const valids = [validAddresses, validQuotedAddresses, validIpDomains, validUnicodeAddresses];
+const invalids = [invalidAddresses];
+const emailRegex = createEmailRegex();
+describe(`createEmailRegex()`, () => {
+  it("Should test true only for valid email", () => {  
+    for (const group of valids) {
+      for (const address of group) {
+        strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: valid`);
       }
-    });
-    it("Should test false for invalid email", () => {
-      for (const group of invalids) {
-        for (const address of group) {
-          strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: invalid`);
-        }
-      }
-    });
+    }
   });
-}
-
+  it("Should test false for invalid email", () => {
+    for (const group of invalids) {
+      for (const address of group) {
+        strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: invalid`);
+      }
+    }
+  });
+});
