@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
-import { createEmailRegex } from "./email-regexp.js";
+import { EMAIL_REGEX } from "./email-regexp.js";
 
 // Mostly from https://en.wikipedia.org/wiki/Email_address
 const invalidAddresses = [
@@ -106,21 +106,21 @@ const validIpDomains = [
 ];
 const valids = [validAddresses, validQuotedAddresses, validIpDomains, validUnicodeAddresses];
 const invalids = [invalidAddresses];
-const emailRegex = createEmailRegex();
-describe(`createEmailRegex()`, () => {
+
+const example = (address, valid) => it(`should return ${valid ? "true" : "false"} for \`${address}\``, () => {
+  strictEqual(`${address}: ${EMAIL_REGEX.test(address) ? "valid" : "invalid"}`, `${address}: ${valid ? "valid" : "invalid"}`);
+});
+
+describe(`EMAIL_REGEX`, () => {
   for (const group of valids) {
     for (const address of group) {
-      it(`should return true for \`${address}\``, () => {
-        strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: valid`);
-      });
+      example(address, true);
     }
   }
 
   for (const group of invalids) {
     for (const address of group) {
-      it(`should return false for \`${address}\``, () => {
-        strictEqual(`${address}: ${emailRegex.test(address) ? "valid" : "invalid"}`, `${address}: invalid`);
-      });
+      example(address, false);
     }
   }
 });
