@@ -1,3 +1,4 @@
+// Based on the RFC 5322 Official Standard: https://www.ietf.org/rfc/rfc5322.txt
 const char = `[^\\x80-\\xff]`;
 // char, without...  nul - spc    "    (    )    ,    .    :  ;  <    >    @    [  \  ]   anything > del
 const atomChar = `[^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x80-\\xff]`;
@@ -34,6 +35,3 @@ export const EMAIL_REGEX_STR = `^(${localPart})@(${domainPart})$`;
 export const EMAIL_REGEX = new RegExp(EMAIL_REGEX_STR, "u");
 
 export default EMAIL_REGEX;
-
-console.log(EMAIL_REGEX_STR);
-// process.exit();

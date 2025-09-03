@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
-import { EMAIL_REGEX } from "./email-regexp.js";
+import { EMAIL_REGEX } from "./emailRegex.js";
 
 // Mostly from https://en.wikipedia.org/wiki/Email_address
 const invalidAddresses = [
@@ -93,7 +93,7 @@ const validQuotedAddresses = [
   `just."weird but".fine@example.com`,
   `"For some reason,
 This is perfectly valid.
-Don't ask me."@wat.com`
+Don't ask me."@wat.com`,
 ];
 
 const validIpDomains = [
@@ -104,12 +104,21 @@ const validIpDomains = [
   // IPv6 with shortened syntax
   `postmaster@[IPv6:2001:db8:85a3::8a2e:370:7334]`,
 ];
-const valids = [validAddresses, validQuotedAddresses, validIpDomains, validUnicodeAddresses];
+const valids = [
+  validAddresses,
+  validQuotedAddresses,
+  validIpDomains,
+  validUnicodeAddresses,
+];
 const invalids = [invalidAddresses];
 
-const example = (address, valid) => it(`should return ${valid ? "true" : "false"} for \`${address}\``, () => {
-  strictEqual(`${address}: ${EMAIL_REGEX.test(address) ? "valid" : "invalid"}`, `${address}: ${valid ? "valid" : "invalid"}`);
-});
+const example = (address, valid) =>
+  it(`should return ${valid ? "true" : "false"} for \`${address}\``, () => {
+    strictEqual(
+      `${address}: ${EMAIL_REGEX.test(address) ? "valid" : "invalid"}`,
+      `${address}: ${valid ? "valid" : "invalid"}`
+    );
+  });
 
 describe(`EMAIL_REGEX`, () => {
   for (const group of valids) {
