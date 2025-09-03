@@ -1,5 +1,3 @@
-import { inspect } from "node:util";
-
 type CommentContext = {
   key: string[][];
   value: string[][];
@@ -23,10 +21,9 @@ type EnvParseContext = {
 /**
  * Straightforward parser for .env files and other files following shell environment syntax.
  * @param content - the env file to parse
- * @param trace - prints information about which function handles each character 
  * @returns {object} the environment, as read from the file
  **/
-export function parseEnv(content: string/*, trace?: boolean*/): object {
+export function parseEnv(content: string): object {
   const context: EnvParseContext = {
     line: 1,
     entries: [],
@@ -34,13 +31,6 @@ export function parseEnv(content: string/*, trace?: boolean*/): object {
   let mode = VAR;
   for (let index = 0; index < content.length; index++) {
     const nextMode = mode(context, content[index], content, index) ?? mode;
-    // if (trace) {
-    //   console.log(
-    //     `${mode.name}(context, ${inspect(content[index])}, ..., ${index}) -> ${
-    //       nextMode.name
-    //     }`
-    //   );
-    // }
     mode = nextMode;
   }
   const commentary = {};
@@ -139,9 +129,6 @@ function VALUE(x: EnvParseContext, c: string, b: string, i: number) {
   value.push(c);
 }
 
-function named(name: string, fn: (...args: any[]) => any) {
-  return Object.defineProperty(fn, name, { value: name });
-}
 const ESCAPE_MAP = {
   r: '\r',
   n: '\n',
@@ -149,15 +136,15 @@ const ESCAPE_MAP = {
 };
 
 function ESCAPE(destination: keyof Omit<EnvParseContext, "line" | "entries" | "comment">, self: Parser): Parser {
-  return named(`ESCAPE(${destination}, ${self.name})`, (x: EnvParseContext, c: string, b: string, i: number) => {
+  return (x: EnvParseContext, c: string, b: string, i: number) => {
     const dest = x[destination] as string[];
     dest.push(ESCAPE_MAP[c] ?? c);
     return self;
-  });
+  };
 }
 
 function QUOTE(type: string, destination: keyof Omit<EnvParseContext, "line" | "entries" | "comment">, self: Parser): Parser {
-  const RESUME = named(`QUOTE(${type}, ${destination}, ${self.name})`, (x: EnvParseContext, c: string, b: string, i: number) => {
+  const RESUME = (x: EnvParseContext, c: string, b: string, i: number) => {
     if (c === type) {
       if (!x.value) {
         x.value = [];
@@ -173,7 +160,7 @@ function QUOTE(type: string, destination: keyof Omit<EnvParseContext, "line" | "
     }
     x[destination].push(c);
     return;
-  });
+  };
   return RESUME;
 }
 
