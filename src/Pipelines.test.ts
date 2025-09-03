@@ -2,7 +2,7 @@ import { deepStrictEqual, rejects, strictEqual, throws } from "node:assert";
 import { toAsyncIterable, concurrently, allOf, lastOf } from "./Pipelines.ts";
 import { describe, it } from "node:test";
 
-describe.only("Pipeline helpers", () => {
+describe("Pipeline helpers", () => {
   describe("toAsyncIterable", () => {
     it("should yield items from a sync iterable", async () => {
       const arr = [1, 2, 3];

@@ -1,6 +1,6 @@
 import type { AsArray } from "./AsArray.d.ts";
 import type { ElementOf } from "./ElementOf.d.ts";
-import type { DeserializationOptions, Step } from "./Pipelines.d.ts";
+import type { Step } from "./Pipelines.d.ts";
 import { ExtensibleFunction } from "./ExtensibleFunction.ts";
 import { cacheAccessors } from "./cacheAccessors.ts";
 

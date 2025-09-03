@@ -28,7 +28,7 @@ const addExclusiveN = (n: number) =>
     }
   );
 
-describe.only("Manifold", () => {
+describe("Manifold", () => {
   it("should look and act like a function", async () => {
     const manifold = new Manifold();
     strictEqual(typeof manifold, "function");

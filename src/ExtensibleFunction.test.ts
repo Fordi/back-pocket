@@ -2,7 +2,7 @@ import { ExtensibleFunction } from "./ExtensibleFunction.ts";
 import { describe, it } from "node:test";
 import { strictEqual, throws } from "node:assert";
 
-describe.only("ExtensibleFunction", () => {
+describe("ExtensibleFunction", () => {
   it("should look and act like a function", () => {
     class Fixture extends ExtensibleFunction<number, number> {
       invoke(x: number) {

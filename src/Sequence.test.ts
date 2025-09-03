@@ -19,6 +19,8 @@ describe("Sequence", () => {
     const seq = new Sequence(step1, step2, step3);
     strictEqual(seq.name, "step1__step2__step3");
     strictEqual(seq.toString(), "Sequence(step1 -> step2 -> step3)");
+    seq.named("TheSequence");
+    strictEqual(seq.toString(), "Sequence(TheSequence: step1 -> step2 -> step3)");
     deepStrictEqual(seq.steps, [step1, step2, step3]);
     deepStrictEqual(seq.toJSON(), {
       type: "Sequence",

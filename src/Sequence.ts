@@ -2,7 +2,6 @@ import type { AsArray } from "./AsArray.d.ts";
 import type { DeserializationOptions, Step, Steps } from "./Pipelines.d.ts";
 import { cacheAccessors } from "./cacheAccessors.ts";
 import { ExtensibleFunction } from "./ExtensibleFunction.ts";
-import { lastOf } from "./lastOf.ts";
 
 const isHidden = (step: any) => !step.hide;
 
@@ -25,7 +24,9 @@ export class Sequence<I, O> extends ExtensibleFunction<I, Promise<O>> {
   }
 
   async invoke(...args: AsArray<I>) {
-    return lastOf(this.iterate(...args)) as O;
+    let final = args;
+    for await (final of this.iterate(...args));
+    return final as O;
   }
 
   async *iterate(...args: AsArray<I>) {
