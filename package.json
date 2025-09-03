@@ -8,7 +8,7 @@
     "build": "npm run build:bookmarklets",
     "serve": "http-server docs",
     "test": "node --test --experimental-test-coverage --report-dir=./src",
-    "coverage": "ntc"
+    "coverage": "npx --package @fordi-org/node-html-reporter ntc --report-dir=./src"
   },
   "author": "",
   "license": "ISC",
