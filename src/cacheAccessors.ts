@@ -15,9 +15,9 @@ export function cacheAccessors<T>(self: T, ...keys: string[]) {
   for (const key of keys) {
     let desc: PropertyDescriptor | undefined;
     let src = self;
-    while (!desc && src !== Object.prototype) {
+    while (!desc?.get && !desc?.set && src !== null) {
       desc = Object.getOwnPropertyDescriptor(src, key);
-      if (!desc) {
+      if (!desc?.get && !desc?.set) {
         src = Object.getPrototypeOf(src);
       }
     }
@@ -28,7 +28,7 @@ export function cacheAccessors<T>(self: T, ...keys: string[]) {
     const setImpl = desc.set as (this: typeof self) => any;
     
     props[key] = {
-      ...desc,
+      configurable: true,
       ...(getImpl && { get() {
         if (!(key in cache)) {
           cache[key] = getImpl.call(this);
