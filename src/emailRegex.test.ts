@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
-import { EMAIL_REGEX } from "./emailRegex.js";
+import { EMAIL_REGEX } from "./emailRegex.ts";
 
 // Mostly from https://en.wikipedia.org/wiki/Email_address
 const invalidAddresses = [
