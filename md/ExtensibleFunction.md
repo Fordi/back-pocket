@@ -8,8 +8,8 @@ A base class for creating functions with additional properties or methods.
 class ExtensibleFunction<Params[], Returns> extends Function;
 ```
 
-- Params[] - the parameter types of the function
-- Returns - the return type of the function
+- **Params[]** - the parameter types of the function
+- **Returns** - the return type of the function
 
 ### Example
 

@@ -8,7 +8,7 @@ Checks if a value is a constructor function, without incidentally executing a va
 isConstructor(value: any): boolean;
 ```
 
-- **value**: The value to check.
+- **value**: The proposed constructor.
 - **returns**: `true` if the value is a constructor, otherwise `false`.
 
 ## Example
