@@ -4,17 +4,17 @@ A utility to bulk-annotate a class for cacheing property accessors, with automat
 
 ## API
 
-### `cacheAccessors<T>(target: T, ...names: string[]): (...names: string[])`
+```ts
+cacheAccessors<T>(target: T, ...names: string[]): (...names: string[]);
+```
 
 - **target**: The object to redefine the accessor on
 - **names**: The accessor names
 - **returns**: A function for manually staleing cached entries.
 
-## Example
+### Example
 
 ```ts
-import { cacheAccessors } from "./cacheAccessors";
-
 class MyClass {
   #stale: (...names: string[]) => void;
   constructor() {

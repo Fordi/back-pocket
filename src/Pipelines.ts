@@ -12,7 +12,7 @@ export type DeserializationOptions<I, O> = {
   after?: Step<any, O>;
 };
 
-export async function* _toAsyncIterable<T>(
+async function* _toAsyncIterable<T>(
   iter: Iterable<T> | AsyncIterable<T>
 ) {
   if (Symbol.asyncIterator in iter) {

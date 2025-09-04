@@ -3,12 +3,13 @@ import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
 
 describe("isConstructor", () => {
-  it("should return true for a constructor function", () => {
-    function MyClass() {}
-    if (isConstructor(MyClass)) {
-      new MyClass();
+  it("should return true for a constructible function, but should not execute it", () => {
+    let executed = false;
+    function MyClass() {
+      executed = true;
     }
     strictEqual(isConstructor(MyClass), true);
+    strictEqual(executed, false);
   });
 
   it("should return false for an arrow function", () => {

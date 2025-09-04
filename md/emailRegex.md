@@ -1,16 +1,16 @@
 # emailRegex
 
-Exports a regular expression for matching email addresses.
+A regular expression for matching email addresses, with rigorous recognition of quoted entities, IP domains, and unicode.
 
 ## API
 
-### `emailRegex: RegExp`
-- **Type**: Regular expression for validating email addresses.
+```ts
+emailRegex: RegExp;
+```
 
 ## Example
-```ts
-import { emailRegex } from './emailRegex';
 
-console.log(emailRegex.test('user@example.com')); // true
-console.log(emailRegex.test('not-an-email')); // false
+```ts
+console.log(emailRegex.test("user@example.com")); // true
+console.log(emailRegex.test("not-an-email")); // false
 ```
