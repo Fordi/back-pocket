@@ -23,7 +23,7 @@ VALUELESS
 
 
 
-describe.only("parseEnv", () => {
+describe("parseEnv", () => {
   it("parses a simple environment file", () => {
     const result = parseEnv(FIXTURE);
     deepStrictEqual(result, {
