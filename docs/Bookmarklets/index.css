@@ -9,6 +9,16 @@ section {
   margin: 0 auto;
   max-width: 6in;
 }
+textarea[bookmarklet] {
+  opacity: 0;
+  transition: opacity, 0.4s;
+  height: calc(100vh - 9em);
+  width: 100%;
+  font-size: 8pt;
+}
+textarea[bookmarklet].ready {
+  opacity: 1;
+}
 .bookmarklet > button {
   border: none;
   background: none;
@@ -26,8 +36,20 @@ section {
   position: relative;
   top: -0.2em;
 }
+.bookmarklet.nopop > button:before {
+  display: none;
+}
 .bookmarklet.open > button {
   transform: rotate(90deg);
+}
+.bookmarklet.top {
+  position: fixed;
+  top: 0px;
+  left: 0;
+}
+.bookmarklet.top.open > pre {
+  max-height: calc(100vh - 7em) !important;
+  overflow: auto;
 }
 .bookmarklet > pre {
   padding: 0 1em;
