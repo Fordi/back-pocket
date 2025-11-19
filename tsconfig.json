@@ -1,0 +1,10 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true, 
+  }
+}
