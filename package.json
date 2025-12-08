@@ -26,7 +26,8 @@
     "monaco-editor": "^0.54.0",
     "rollup": "^4.2.0",
     "rollup-plugin-import-css": "^4.1.2",
-    "terser": "^5.24.0"
+    "terser": "^5.24.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "prettier": "^3.6.2"

@@ -6,5 +6,7 @@
     "skipLibCheck": true,
     "declaration": true,
     "sourceMap": true, 
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
   }
 }
